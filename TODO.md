@@ -18,9 +18,9 @@
     - [x] 实现侧边导航栏 (NavigationRail)
     - [x] 实现顶部标题栏与窗口控制按钮
 
-- [ ] **核心播放器逻辑**
+- [x] **核心播放器逻辑**
     - [x] 封装 Audio Service
-    - [ ] 实现播放、暂停、进度控制
+    - [x] 实现播放、暂停、进度控制
 
 - [ ] **文件系统与数据库**
     - [ ] 实现文件夹选择器
@@ -47,3 +47,4 @@
 * *2026-02-16*: NavigationRail 实现完成。创建 NavItem 数据模型、NavigationProvider (ChangeNotifier)，支持 Home/Library/Search/Playlist 4 个导航项。AppShell 包含 NavigationRail + Expanded 内容区域。
 * *2026-02-16*: 自定义标题栏 (CustomTitleBar) 实现完成。包含应用名称、最小化/最大化/关闭按钮（Windows 平台）、悬停效果。关闭按钮变红，最大化按钮动态切换状态。
 * *2026-02-16*: Audio Service 封装完成。创建 AudioService (基于 just_audio)、PlayerState 数据模型、PlayerProvider (ChangeNotifier)。支持加载、播放、暂停、停止、音量控制、进度条拖动、流式状态更新。
+* *2026-02-16*: 播放控制 UI 实现完成。创建 MiniPlayer（底部迷你播放器，显示曲名/艺术家、播放/暂停按钮）、PlayerControlBar（完整控制栏）。集成到 AppShell，支持 Slider 拖动进度条、时长显示、Play/Pause 切换。

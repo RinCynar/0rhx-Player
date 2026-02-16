@@ -7,6 +7,7 @@ import '../../library/pages/library_page.dart';
 import '../../search/pages/search_page.dart';
 import '../../playlist/pages/playlist_page.dart';
 import '../widgets/custom_title_bar.dart';
+import '../../player/widgets/mini_player.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -22,29 +23,38 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomTitleBar(title: '0rhx Player'),
-      body: Row(
+      body: Column(
         children: [
-          // NavigationRail
-          NavigationRail(
-            selectedIndex: context.watch<NavigationProvider>().currentIndex,
-            onDestinationSelected: (index) {
-              context.read<NavigationProvider>().navigate(index);
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: NavItem.items
-                .map(
-                  (item) => NavigationRailDestination(
-                    icon: Icon(item.icon),
-                    selectedIcon: Icon(item.icon),
-                    label: Text(item.label),
-                  ),
-                )
-                .toList(),
-          ),
-          // Content Area
           Expanded(
-            child: _pages[context.watch<NavigationProvider>().currentIndex],
+            child: Row(
+              children: [
+                // NavigationRail
+                NavigationRail(
+                  selectedIndex: context.watch<NavigationProvider>().currentIndex,
+                  onDestinationSelected: (index) {
+                    context.read<NavigationProvider>().navigate(index);
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: NavItem.items
+                      .map(
+                        (item) => NavigationRailDestination(
+                          icon: Icon(item.icon),
+                          selectedIcon: Icon(item.icon),
+                          label: Text(item.label),
+                        ),
+                      )
+                      .toList(),
+                ),
+                // Content Area
+                Expanded(
+                  child: _pages[context.watch<NavigationProvider>().currentIndex],
+                ),
+              ],
+            ),
           ),
+          // Mini Player at bottom
+          const Divider(height: 1),
+          const MiniPlayer(),
         ],
       ),
     );
