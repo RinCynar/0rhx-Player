@@ -4,13 +4,13 @@
 
 ## 🚀 Current Focus (Phase 1: Windows MVP)
 
-- [ ] **项目初始化**
-    - [ ] 创建 Flutter 项目 (支持 Windows, Linux, Android)
-    - [ ] 配置 `pubspec.yaml` (添加 `provider`, `isar`, `window_manager`, `media_kit` 等依赖)
-    - [ ] **配置 App Icon**
-        - [ ] 添加 `flutter_launcher_icons` 到 `dev_dependencies`
-        - [ ] 在 `pubspec.yaml` 中配置图标路径 (`assets/icon/app_icon.png`)
-        - [ ] 运行生成命令 (`flutter pub run flutter_launcher_icons`) 以覆盖默认 Flutter 图标
+- [x] **项目初始化**
+    - [x] 创建 Flutter 项目 (支持 Windows, Linux, Android)
+    - [x] 配置 `pubspec.yaml` (添加 `provider`, `isar`, `window_manager`, `just_audio` 等依赖)
+    - [x] **配置 App Icon**
+        - [x] 添加 `flutter_launcher_icons` 到 `dev_dependencies`
+        - [x] 在 `pubspec.yaml` 中配置图标路径 (`assets/icon/app_icon.png`)
+        - [x] 运行生成命令 (`flutter pub run flutter_launcher_icons`) 以覆盖默认 Flutter 图标
     - [ ] 设置 Material 3 主题 (从 Design/Desktop 中提取配色)
 
 - [ ] **UI 框架搭建 (Windows)**
@@ -39,5 +39,6 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
-* *Date: YYYY-MM-DD*: 决定使用 Isar 作为数据库，因为它的查询速度比 SQLite 快，且对 Flutter 支持更好。
-* *Date: YYYY-MM-DD*: 设计图位于 `Design/Desktop/v1.png`，主色调需提取 #XXXXXX。
+* *2026-02-16*: 完成项目骨架初始化。使用 `just_audio` 替代 `media_kit`（版本兼容性更好）。使用 `provider` 做状态管理，`isar` 做数据库，`window_manager` 做桌面窗口管理。
+* *2026-02-16*: App Icon 已通过 `flutter_launcher_icons` 生成，覆盖 Windows/Android/Linux 图标。
+* *2026-02-16*: 设计图位于 `Design/Desktop/`，有 5 个主要页面设计（home, library, playlist, search, settings）。
