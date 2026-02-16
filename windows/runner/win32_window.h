@@ -90,6 +90,9 @@ class Win32Window {
   // Update the window frame's theme to match the system theme.
   static void UpdateTheme(HWND const window);
 
+  // Enable borderless window style using DWM
+  static void EnableBorderless(HWND const window);
+
   bool quit_on_close_ = false;
 
   // window handle for top level window.

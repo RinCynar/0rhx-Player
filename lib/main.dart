@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
+import 'core/window/window_config.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WindowConfig.initialize();
   runApp(const MyApp());
 }
 

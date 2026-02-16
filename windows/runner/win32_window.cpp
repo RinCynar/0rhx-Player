@@ -134,8 +134,11 @@ bool Win32Window::Create(const std::wstring& title,
   UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
   double scale_factor = dpi / 96.0;
 
+  // Use WS_POPUP for borderless window effect, combine with WS_SYSMENU and WS_MINIMIZEBOX for taskbar presence
+  DWORD style = WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
+  
   HWND window = CreateWindow(
-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
+      window_class, title.c_str(), style,
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
@@ -144,6 +147,8 @@ bool Win32Window::Create(const std::wstring& title,
     return false;
   }
 
+  // Enable borderless window with DWM
+  EnableBorderless(window);
   UpdateTheme(window);
 
   return OnCreate();
@@ -285,4 +290,15 @@ void Win32Window::UpdateTheme(HWND const window) {
     DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &enable_dark_mode, sizeof(enable_dark_mode));
   }
+}
+
+void Win32Window::EnableBorderless(HWND const window) {
+  // Extended window style for borderless appearance
+  DWORD exStyle = GetWindowLong(window, GWL_EXSTYLE);
+  exStyle |= WS_EX_LAYERED;  // Enable layered window for transparency support
+  SetWindowLong(window, GWL_EXSTYLE, exStyle);
+  
+  // Extend the frame into the client area to hide the window frame
+  MARGINS margins = {-1, -1, -1, -1};
+  DwmExtendFrameIntoClientArea(window, &margins);
 }
