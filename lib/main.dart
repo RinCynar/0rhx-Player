@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/window/window_config.dart';
 import 'features/navigation/providers/nav_provider.dart';
+import 'features/player/providers/player_provider.dart';
 import 'features/app/pages/app_shell.dart';
 
 void main() async {
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => PlayerProvider()),
       ],
       child: MaterialApp(
         title: '0rhx Player',
