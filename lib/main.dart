@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'core/window/window_config.dart';
 import 'features/navigation/providers/nav_provider.dart';
 import 'features/player/providers/player_provider.dart';
+import 'features/library/providers/library_provider.dart';
 import 'features/app/pages/app_shell.dart';
 
 void main() async {
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => PlayerProvider()),
+        ChangeNotifierProvider(create: (_) => LibraryProvider()),
       ],
       child: MaterialApp(
         title: '0rhx Player',
