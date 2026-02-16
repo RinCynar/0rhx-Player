@@ -6,6 +6,7 @@ import '../../home/pages/home_page.dart';
 import '../../library/pages/library_page.dart';
 import '../../search/pages/search_page.dart';
 import '../../playlist/pages/playlist_page.dart';
+import '../widgets/custom_title_bar.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -20,6 +21,7 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomTitleBar(title: '0rhx Player'),
       body: Row(
         children: [
           // NavigationRail

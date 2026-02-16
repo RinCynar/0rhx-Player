@@ -13,10 +13,10 @@
         - [x] 运行生成命令 (`flutter pub run flutter_launcher_icons`) 以覆盖默认 Flutter 图标
     - [x] 设置 Material 3 主题 (从 Design/Desktop 中提取配色)
 
-- [ ] **UI 框架搭建 (Windows)**
+- [x] **UI 框架搭建 (Windows)**
     - [x] 实现自定义无边框窗口 (使用 `window_manager` 及 DWM)
     - [x] 实现侧边导航栏 (NavigationRail)
-    - [ ] 实现顶部标题栏与窗口控制按钮
+    - [x] 实现顶部标题栏与窗口控制按钮
 
 - [ ] **核心播放器逻辑**
     - [ ] 封装 Audio Service
@@ -45,3 +45,4 @@
 * *2026-02-16*: Material 3 主题配置完成。主色 #9C7FD4 (淡紫)，背景 #FAF8FF，表面 #F5F1FF，遵循设计稿配色。
 * *2026-02-16*: Windows 无边框窗口实现完成。使用 WS_POPUP style + DwmExtendFrameIntoClientArea() 实现 DWM 无边框效果。Flutter 层通过 window_manager + WindowConfig 初始化。
 * *2026-02-16*: NavigationRail 实现完成。创建 NavItem 数据模型、NavigationProvider (ChangeNotifier)，支持 Home/Library/Search/Playlist 4 个导航项。AppShell 包含 NavigationRail + Expanded 内容区域。
+* *2026-02-16*: 自定义标题栏 (CustomTitleBar) 实现完成。包含应用名称、最小化/最大化/关闭按钮（Windows 平台）、悬停效果。关闭按钮变红，最大化按钮动态切换状态。
