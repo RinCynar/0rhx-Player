@@ -11,7 +11,7 @@
         - [x] 添加 `flutter_launcher_icons` 到 `dev_dependencies`
         - [x] 在 `pubspec.yaml` 中配置图标路径 (`assets/icon/app_icon.png`)
         - [x] 运行生成命令 (`flutter pub run flutter_launcher_icons`) 以覆盖默认 Flutter 图标
-    - [ ] 设置 Material 3 主题 (从 Design/Desktop 中提取配色)
+    - [x] 设置 Material 3 主题 (从 Design/Desktop 中提取配色)
 
 - [ ] **UI 框架搭建 (Windows)**
     - [ ] 实现自定义无边框窗口 (使用 `bitsdojo_window` 或 `window_manager`)
@@ -42,3 +42,4 @@
 * *2026-02-16*: 完成项目骨架初始化。使用 `just_audio` 替代 `media_kit`（版本兼容性更好）。使用 `provider` 做状态管理，`isar` 做数据库，`window_manager` 做桌面窗口管理。
 * *2026-02-16*: App Icon 已通过 `flutter_launcher_icons` 生成，覆盖 Windows/Android/Linux 图标。
 * *2026-02-16*: 设计图位于 `Design/Desktop/`，有 5 个主要页面设计（home, library, playlist, search, settings）。
+* *2026-02-16*: Material 3 主题配置完成。主色 #9C7FD4 (淡紫)，背景 #FAF8FF，表面 #F5F1FF，遵循设计稿配色。
