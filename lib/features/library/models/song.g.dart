@@ -83,34 +83,7 @@ const SongSchema = CollectionSchema(
   deserialize: _songDeserialize,
   deserializeProp: _songDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'title': IndexSchema(
-      id: -7636685945352118059,
-      name: r'title',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'title',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
-    r'filePath': IndexSchema(
-      id: 2918041768256347220,
-      name: r'filePath',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'filePath',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _songGetId,
@@ -312,93 +285,6 @@ extension SongQueryWhere on QueryBuilder<Song, Song, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<Song, Song, QAfterWhereClause> titleEqualTo(String title) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'title',
-        value: [title],
-      ));
-    });
-  }
-
-  QueryBuilder<Song, Song, QAfterWhereClause> titleNotEqualTo(String title) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'title',
-              lower: [],
-              upper: [title],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'title',
-              lower: [title],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'title',
-              lower: [title],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'title',
-              lower: [],
-              upper: [title],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Song, Song, QAfterWhereClause> filePathEqualTo(String filePath) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'filePath',
-        value: [filePath],
-      ));
-    });
-  }
-
-  QueryBuilder<Song, Song, QAfterWhereClause> filePathNotEqualTo(
-      String filePath) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'filePath',
-              lower: [],
-              upper: [filePath],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'filePath',
-              lower: [filePath],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'filePath',
-              lower: [filePath],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'filePath',
-              lower: [],
-              upper: [filePath],
-              includeUpper: false,
-            ));
-      }
     });
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../navigation/models/nav_item.dart';
 import '../../navigation/providers/nav_provider.dart';
+import '../../library/providers/library_provider.dart';
 import '../../home/pages/home_page.dart';
 import '../../library/pages/library_page.dart';
 import '../../search/pages/search_page.dart';
@@ -9,15 +10,31 @@ import '../../playlist/pages/playlist_page.dart';
 import '../widgets/custom_title_bar.dart';
 import '../../player/widgets/mini_player.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
   static const List<Widget> _pages = [
     HomePage(),
     LibraryPage(),
     SearchPage(),
     PlaylistPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化库数据库
+    Future.microtask(() {
+      if (mounted) {
+        context.read<LibraryProvider>().initialize();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -37,19 +37,14 @@ const AlbumSchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'songCount': PropertySchema(
+    r'releaseYear': PropertySchema(
       id: 4,
-      name: r'songCount',
+      name: r'releaseYear',
       type: IsarType.long,
     ),
-    r'totalDurationMs': PropertySchema(
+    r'songCount': PropertySchema(
       id: 5,
-      name: r'totalDurationMs',
-      type: IsarType.long,
-    ),
-    r'year': PropertySchema(
-      id: 6,
-      name: r'year',
+      name: r'songCount',
       type: IsarType.long,
     )
   },
@@ -58,21 +53,7 @@ const AlbumSchema = CollectionSchema(
   deserialize: _albumDeserialize,
   deserializeProp: _albumDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'name': IndexSchema(
-      id: 879695947855722453,
-      name: r'name',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'name',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _albumGetId,
@@ -113,9 +94,8 @@ void _albumSerialize(
   writer.writeString(offsets[1], object.coverPath);
   writer.writeDateTime(offsets[2], object.dateAdded);
   writer.writeString(offsets[3], object.name);
-  writer.writeLong(offsets[4], object.songCount);
-  writer.writeLong(offsets[5], object.totalDurationMs);
-  writer.writeLong(offsets[6], object.year);
+  writer.writeLong(offsets[4], object.releaseYear);
+  writer.writeLong(offsets[5], object.songCount);
 }
 
 Album _albumDeserialize(
@@ -129,9 +109,8 @@ Album _albumDeserialize(
     coverPath: reader.readStringOrNull(offsets[1]),
     dateAdded: reader.readDateTime(offsets[2]),
     name: reader.readString(offsets[3]),
-    songCount: reader.readLongOrNull(offsets[4]) ?? 0,
-    totalDurationMs: reader.readLongOrNull(offsets[5]) ?? 0,
-    year: reader.readLongOrNull(offsets[6]),
+    releaseYear: reader.readLongOrNull(offsets[4]),
+    songCount: reader.readLongOrNull(offsets[5]) ?? 0,
   );
   object.id = id;
   return object;
@@ -153,11 +132,9 @@ P _albumDeserializeProp<P>(
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
       return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 6:
-      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -246,49 +223,6 @@ extension AlbumQueryWhere on QueryBuilder<Album, Album, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterWhereClause> nameEqualTo(String name) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'name',
-        value: [name],
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterWhereClause> nameNotEqualTo(String name) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'name',
-              lower: [],
-              upper: [name],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'name',
-              lower: [name],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'name',
-              lower: [name],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'name',
-              lower: [],
-              upper: [name],
-              includeUpper: false,
-            ));
-      }
     });
   }
 }
@@ -818,6 +752,75 @@ extension AlbumQueryFilter on QueryBuilder<Album, Album, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'releaseYear',
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'releaseYear',
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'releaseYear',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'releaseYear',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'releaseYear',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> releaseYearBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'releaseYear',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterFilterCondition> songCountEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -863,127 +866,6 @@ extension AlbumQueryFilter on QueryBuilder<Album, Album, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'songCount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> totalDurationMsEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'totalDurationMs',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> totalDurationMsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'totalDurationMs',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> totalDurationMsLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'totalDurationMs',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> totalDurationMsBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'totalDurationMs',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'year',
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'year',
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'year',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'year',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'year',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterFilterCondition> yearBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'year',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1046,6 +928,18 @@ extension AlbumQuerySortBy on QueryBuilder<Album, Album, QSortBy> {
     });
   }
 
+  QueryBuilder<Album, Album, QAfterSortBy> sortByReleaseYear() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releaseYear', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> sortByReleaseYearDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releaseYear', Sort.desc);
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterSortBy> sortBySongCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songCount', Sort.asc);
@@ -1055,30 +949,6 @@ extension AlbumQuerySortBy on QueryBuilder<Album, Album, QSortBy> {
   QueryBuilder<Album, Album, QAfterSortBy> sortBySongCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songCount', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> sortByTotalDurationMs() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalDurationMs', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> sortByTotalDurationMsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalDurationMs', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> sortByYear() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'year', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> sortByYearDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'year', Sort.desc);
     });
   }
 }
@@ -1144,6 +1014,18 @@ extension AlbumQuerySortThenBy on QueryBuilder<Album, Album, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Album, Album, QAfterSortBy> thenByReleaseYear() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releaseYear', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> thenByReleaseYearDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'releaseYear', Sort.desc);
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterSortBy> thenBySongCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songCount', Sort.asc);
@@ -1153,30 +1035,6 @@ extension AlbumQuerySortThenBy on QueryBuilder<Album, Album, QSortThenBy> {
   QueryBuilder<Album, Album, QAfterSortBy> thenBySongCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songCount', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> thenByTotalDurationMs() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalDurationMs', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> thenByTotalDurationMsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalDurationMs', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> thenByYear() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'year', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Album, Album, QAfterSortBy> thenByYearDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'year', Sort.desc);
     });
   }
 }
@@ -1209,21 +1067,15 @@ extension AlbumQueryWhereDistinct on QueryBuilder<Album, Album, QDistinct> {
     });
   }
 
+  QueryBuilder<Album, Album, QDistinct> distinctByReleaseYear() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'releaseYear');
+    });
+  }
+
   QueryBuilder<Album, Album, QDistinct> distinctBySongCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'songCount');
-    });
-  }
-
-  QueryBuilder<Album, Album, QDistinct> distinctByTotalDurationMs() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'totalDurationMs');
-    });
-  }
-
-  QueryBuilder<Album, Album, QDistinct> distinctByYear() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'year');
     });
   }
 }
@@ -1259,21 +1111,15 @@ extension AlbumQueryProperty on QueryBuilder<Album, Album, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Album, int?, QQueryOperations> releaseYearProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'releaseYear');
+    });
+  }
+
   QueryBuilder<Album, int, QQueryOperations> songCountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'songCount');
-    });
-  }
-
-  QueryBuilder<Album, int, QQueryOperations> totalDurationMsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'totalDurationMs');
-    });
-  }
-
-  QueryBuilder<Album, int?, QQueryOperations> yearProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'year');
     });
   }
 }
