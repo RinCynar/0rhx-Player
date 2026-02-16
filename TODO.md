@@ -24,7 +24,7 @@
 
 - [ ] **文件系统与数据库**
     - [x] 实现文件夹选择器
-    - [ ] 扫描本地音频文件 (.mp3, .flac, .wav)
+    - [x] 扫描本地音频文件 (.mp3, .flac, .wav)
     - [ ] 设计 Isar 数据库模型 (Song, Album, Artist)
 
 ## 🔮 Future Tasks (Backlog)
@@ -49,3 +49,4 @@
 * *2026-02-16*: Audio Service 封装完成。创建 AudioService (基于 just_audio)、PlayerState 数据模型、PlayerProvider (ChangeNotifier)。支持加载、播放、暂停、停止、音量控制、进度条拖动、流式状态更新。
 * *2026-02-16*: 播放控制 UI 实现完成。创建 MiniPlayer（底部迷你播放器，显示曲名/艺术家、播放/暂停按钮）、PlayerControlBar（完整控制栏）。集成到 AppShell，支持 Slider 拖动进度条、时长显示、Play/Pause 切换。
 * *2026-02-16*: 文件夹选择器实现完成。创建 FileScannerService（递归扫描目录支持 .mp3/.flac/.wav/.aac/.m4a）、FolderPickerDialog（UI 对话框支持导航和文件夹选择）、LibraryProvider（管理音乐目录和文件列表）。
+* *2026-02-16*: 本地音频文件扫描与展示完成。更新 LibraryPage 支持添加文件夹、显示扫描的音频文件列表、删除文件夹。集成 LibraryProvider 进行状态管理，支持显示加载状态和空状态。
