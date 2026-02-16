@@ -15,7 +15,7 @@
 
 - [ ] **UI 框架搭建 (Windows)**
     - [x] 实现自定义无边框窗口 (使用 `window_manager` 及 DWM)
-    - [ ] 实现侧边导航栏 (NavigationRail)
+    - [x] 实现侧边导航栏 (NavigationRail)
     - [ ] 实现顶部标题栏与窗口控制按钮
 
 - [ ] **核心播放器逻辑**
@@ -44,3 +44,4 @@
 * *2026-02-16*: 设计图位于 `Design/Desktop/`，有 5 个主要页面设计（home, library, playlist, search, settings）。
 * *2026-02-16*: Material 3 主题配置完成。主色 #9C7FD4 (淡紫)，背景 #FAF8FF，表面 #F5F1FF，遵循设计稿配色。
 * *2026-02-16*: Windows 无边框窗口实现完成。使用 WS_POPUP style + DwmExtendFrameIntoClientArea() 实现 DWM 无边框效果。Flutter 层通过 window_manager + WindowConfig 初始化。
+* *2026-02-16*: NavigationRail 实现完成。创建 NavItem 数据模型、NavigationProvider (ChangeNotifier)，支持 Home/Library/Search/Playlist 4 个导航项。AppShell 包含 NavigationRail + Expanded 内容区域。
