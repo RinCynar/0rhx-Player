@@ -29,7 +29,7 @@
     - [x] 集成 DatabaseService 到 LibraryProvider
 
 - [ ] **UI 完善 (设计还原)**
-    - [ ] 完善 LibraryPage UI（按照 Design/Desktop/library.png）
+    - [x] 完善 LibraryPage UI（按照 Design/Desktop/library.png）
     - [ ] 完善 HomePage UI（按照 Design/Desktop/home.png）
 
 ## 🔮 Future Tasks (Backlog)
@@ -44,6 +44,7 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
+* *2026-02-17*: LibraryPage UI 完成还原。重写为 StatefulWidget with TabController，支持 4 个标签页（Titles、Artists、Albums、Folders）。Titles 标签页显示网格布局的歌曲卡片（5 列），每个卡片显示占位符图标、标题、更新时间。Folders 标签页显示已添加文件夹列表。Artists 和 Albums 标签页预留待实现。支持点击卡片播放歌曲、删除文件夹等交互。
 * *2026-02-17*: DatabaseService 集成到 LibraryProvider 完成。LibraryProvider 现在在初始化时调用 DatabaseService.initialize() 加载已保存歌曲，扫描新文件时创建 Song 对象并批量保存到数据库。AppShell 改为 StatefulWidget，在 initState 中初始化库。提供 songs 属性和 searchSongs() 方法供 UI 直接使用，兼容旧的 audioFiles API。
 * *2026-02-17*: Isar 数据库模型设计完成。创建三个 @collection 类：Song（包含 title, filePath, artist, album, genre, duration, durationMs, isFavorite, playCount, lastPlayedAt, dateAdded, dateModified）、Album（name, artist, releaseYear, songCount, coverPath, dateAdded）、Artist（name, songCount, albumCount, dateAdded）。DatabaseService 提供单例模式访问 Isar 实例，包含 CRUD 操作和查询方法。添加 path_provider 依赖用于数据库目录管理。
 * *2026-02-16*: 完成项目骨架初始化。使用 `just_audio` 替代 `media_kit`（版本兼容性更好）。使用 `provider` 做状态管理，`isar` 做数据库，`window_manager` 做桌面窗口管理。
