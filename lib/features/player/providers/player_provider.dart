@@ -68,6 +68,16 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   Future<void> play() async {
+    // Guard: 无有效曲目时不播放
+    if (currentTrackTitle == null || currentTrackTitle!.isEmpty) {
+      _playerState = _playerState.copyWith(
+        state: PlaybackState.error,
+        errorMessage: 'No track loaded',
+      );
+      notifyListeners();
+      return;
+    }
+
     try {
       await _audioService.play();
       _playerState = _playerState.copyWith(state: PlaybackState.playing);
@@ -75,7 +85,7 @@ class PlayerProvider extends ChangeNotifier {
     } catch (e) {
       _playerState = _playerState.copyWith(
         state: PlaybackState.error,
-        errorMessage: e.toString(),
+        errorMessage: 'Play failed: $e',
       );
       notifyListeners();
     }
@@ -89,7 +99,7 @@ class PlayerProvider extends ChangeNotifier {
     } catch (e) {
       _playerState = _playerState.copyWith(
         state: PlaybackState.error,
-        errorMessage: e.toString(),
+        errorMessage: 'Pause failed: $e',
       );
       notifyListeners();
     }

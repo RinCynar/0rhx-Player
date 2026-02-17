@@ -80,42 +80,72 @@ class LibraryProvider extends ChangeNotifier {
 
       _songs.clear();
       final newSongs = <Song>[];
+      
+      // Guard: 无扫描目录时返回
+      if (_musicDirectories.isEmpty) {
+        debugPrint('No music directories configured');
+        _isScanning = false;
+        notifyListeners();
+        return;
+      }
 
       for (final directory in _musicDirectories) {
-        final files = await _scannerService.scanDirectory(directory);
-        
-        for (final filePath in files) {
-          final metadata = await _scannerService.getFileMetadata(filePath);
+        try {
+          final files = await _scannerService.scanDirectory(directory);
+          debugPrint('Found ${files.length} files in $directory');
           
-          // 计算时长字符串（MM:SS）
-          final durationMs = int.tryParse(metadata['duration'] ?? '0') ?? 0;
-          final seconds = durationMs ~/ 1000;
-          final minutes = seconds ~/ 60;
-          final remainingSeconds = seconds % 60;
-          final durationStr = '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
-          
-          // 创建 Song 对象并添加到列表
-          final song = Song(
-            title: metadata['title'] ?? 'Unknown',
-            filePath: filePath,
-            artist: metadata['artist'],
-            album: metadata['album'],
-            genre: metadata['genre'],
-            duration: durationStr,
-            durationMs: durationMs,
-            dateAdded: DateTime.now(),
-          );
-          newSongs.add(song);
+          for (final filePath in files) {
+            try {
+              final metadata = await _scannerService.getFileMetadata(filePath);
+              
+              // Guard: 无效的元数据时跳过
+              if (metadata.isEmpty || (metadata['title'] ?? '').isEmpty) {
+                debugPrint('Skipping file with invalid metadata: $filePath');
+                continue;
+              }
+              
+              // 计算时长字符串（MM:SS）
+              final durationMs = int.tryParse(metadata['duration'] ?? '0') ?? 0;
+              final seconds = durationMs ~/ 1000;
+              final minutes = seconds ~/ 60;
+              final remainingSeconds = seconds % 60;
+              final durationStr = '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+              
+              // 创建 Song 对象并添加到列表
+              final song = Song(
+                title: metadata['title'] ?? 'Unknown',
+                filePath: filePath,
+                artist: metadata['artist'],
+                album: metadata['album'],
+                genre: metadata['genre'],
+                duration: durationStr,
+                durationMs: durationMs,
+                dateAdded: DateTime.now(),
+              );
+              newSongs.add(song);
+            } catch (e) {
+              debugPrint('Error processing file $filePath: $e');
+              // 继续处理下一个文件
+            }
+          }
+        } catch (e) {
+          debugPrint('Error scanning directory $directory: $e');
+          // 继续处理下一个目录
         }
       }
 
-      // 批量保存到数据库
+      // 批量保存到数据库（去重：通过文件路径）
       if (newSongs.isNotEmpty) {
-        await _dbService.addSongs(newSongs);
+        try {
+          await _dbService.addSongs(newSongs);
+        } catch (e) {
+          _errorMessage = 'Database save failed: $e';
+          debugPrint('Database save error: $e');
+        }
       }
 
       _songs.addAll(newSongs);
-      debugPrint('Scanned ${_songs.length} audio files');
+      debugPrint('Scanned ${_songs.length} audio files total');
       _isScanning = false;
       notifyListeners();
     } catch (e) {

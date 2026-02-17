@@ -32,18 +32,24 @@ class FileScannerService {
       final entities = await directory.list().toList();
 
       for (final entity in entities) {
-        if (entity is File) {
-          final ext = entity.path.toLowerCase().split('.').last;
-          if (supportedFormats.contains('.$ext')) {
-            results.add(entity.path);
+        try {
+          if (entity is File) {
+            final ext = entity.path.toLowerCase().split('.').last;
+            if (supportedFormats.contains('.$ext')) {
+              results.add(entity.path);
+            }
+          } else if (entity is Directory) {
+            // Recursively scan subdirectories
+            await _scanRecursive(entity, results);
           }
-        } else if (entity is Directory) {
-          // Recursively scan subdirectories
-          await _scanRecursive(entity, results);
+        } catch (e) {
+          // 跳过无法访问的文件/目录，继续扫描
+          debugPrint('Error accessing entity ${entity.path}: $e');
         }
       }
     } catch (e) {
-      debugPrint('Error scanning directory: $e');
+      debugPrint('Error listing directory contents: $e');
+      // 非致命错误，允许扫描继续
     }
   }
 
