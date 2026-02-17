@@ -55,6 +55,9 @@ dependencies:
   # Utilities
   equatable: any
   path_provider: any
+  
+  # Metadata Extraction
+  metadata_god: any
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:metadata_god/metadata_god.dart';
 
 class FileScannerService {
   final List<String> supportedFormats = ['.mp3', '.flac', '.wav', '.aac', '.m4a'];
@@ -46,7 +47,7 @@ class FileScannerService {
     }
   }
 
-  /// Get file metadata (title, duration, etc.)
+  /// Get file metadata using metadata_god library
   Future<Map<String, String>> getFileMetadata(String filePath) async {
     try {
       final file = File(filePath);
@@ -54,8 +55,31 @@ class FileScannerService {
       final parts = fileName.split('.');
       final defaultTitle = parts.length > 1 ? parts.sublist(0, parts.length - 1).join('.') : fileName;
 
-      // Return basic metadata from filename
-      // TODO: Integrate proper metadata extraction library in future
+      // Try to extract metadata using metadata_god
+      try {
+        final metadata = await MetadataGod.retrieveMetadata(filePath: filePath);
+        
+        if (metadata != null) {
+          // Extract duration in milliseconds
+          int durationMs = 0;
+          if (metadata.duration != null) {
+            durationMs = metadata.duration!.inMilliseconds;
+          }
+
+          return {
+            'title': metadata.trackName?.isNotEmpty == true ? metadata.trackName! : defaultTitle,
+            'artist': metadata.artist?.isNotEmpty == true ? metadata.artist! : 'Unknown',
+            'duration': durationMs.toString(),
+            'album': metadata.albumName?.isNotEmpty == true ? metadata.albumName! : 'Unknown',
+            'genre': metadata.genre?.isNotEmpty == true ? metadata.genre! : 'Unknown',
+            'path': filePath,
+          };
+        }
+      } catch (e) {
+        debugPrint('Metadata extraction failed for $filePath: $e, using filename fallback');
+      }
+
+      // Fallback to filename-based metadata if extraction fails
       return {
         'title': defaultTitle,
         'artist': 'Unknown',
