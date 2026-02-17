@@ -57,21 +57,18 @@ class FileScannerService {
 
       // Try to extract metadata using metadata_god
       try {
-        final metadata = await MetadataGod.retrieveMetadata(filePath: filePath);
+        final metadata = await MetadataGod.readMetadata(file: filePath);
         
         if (metadata != null) {
           // Extract duration in milliseconds
-          int durationMs = 0;
-          if (metadata.duration != null) {
-            durationMs = metadata.duration!.inMilliseconds;
-          }
+          int durationMs = (metadata.durationMs ?? 0).toInt();
 
           return {
-            'title': metadata.trackName?.isNotEmpty == true ? metadata.trackName! : defaultTitle,
-            'artist': metadata.artist?.isNotEmpty == true ? metadata.artist! : 'Unknown',
+            'title': (metadata.title?.isNotEmpty ?? false) ? metadata.title! : defaultTitle,
+            'artist': (metadata.artist?.isNotEmpty ?? false) ? metadata.artist! : 'Unknown',
             'duration': durationMs.toString(),
-            'album': metadata.albumName?.isNotEmpty == true ? metadata.albumName! : 'Unknown',
-            'genre': metadata.genre?.isNotEmpty == true ? metadata.genre! : 'Unknown',
+            'album': (metadata.album?.isNotEmpty ?? false) ? metadata.album! : 'Unknown',
+            'genre': (metadata.genre?.isNotEmpty ?? false) ? metadata.genre! : 'Unknown',
             'path': filePath,
           };
         }

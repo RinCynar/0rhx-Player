@@ -49,6 +49,7 @@
     - [x] 集成元数据库获取真实的曲名、艺术家、时长（集成 metadata_god）
 
 - [ ] **Phase 1 完成度检查**
+    - [x] 修复 metadata_god 集成（API 调用、初始化、类型转换）
     - [ ] 测试所有功能是否正常工作
     - [ ] 处理已知的 bug 和边界情况
 
@@ -64,7 +65,8 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
-* *2026-02-17*: 集成 `metadata_god` 库完成。在 pubspec.yaml 中添加依赖，更新 FileScannerService.getFileMetadata() 使用 MetadataGod.retrieveMetadata() 提取真实的 trackName、artist、albumName、genre 和 duration。当提取失败时自动回退到文件名解析。duration 返回毫秒单位字符串，LibraryProvider 处理转换为 MM:SS 格式。支持 .mp3、.flac、.wav、.aac、.m4a 格式。
+* *2026-02-17*: 修复 `metadata_god` 集成。使用正确的 API MetadataGod.readMetadata(file: path) 替代 retrieveMetadata()。在 main.dart 中添加 MetadataGod.initialize() 调用。修复类型转换：durationMs 为 num 需要 .toInt()，字符串检查使用 ?? false 避免不必要的空值比较警告。
+* *2026-02-17*: 集成 `metadata_god` 库完成。在 pubspec.yaml 中添加依赖，更新 FileScannerService.getFileMetadata() 使用 MetadataGod.readMetadata() 提取真实的 title、artist、album、genre 和 durationMs。当提取失败时自动回退到文件名解析。duration 返回毫秒单位字符串，LibraryProvider 处理转换为 MM:SS 格式。支持 .mp3、.flac、.wav、.aac、.m4a 格式。
 * *2026-02-17*: 音乐元数据提取框架优化完成。调整 FileScannerService.getFileMetadata() 方法为返回字典结构（title, artist, duration, album, genre），duration 字段现为毫秒单位字符串。LibraryProvider.scanLibrary() 已更新以处理毫秒时长并转换为 MM:SS 格式。准备好集成具体的元数据提取库（如 audio_metadata_reader 或 metadata_god），但暂未集成以避免依赖兼容性问题。
 * *2026-02-17*: PlaylistPage UI 完成还原。重写为 StatefulWidget with TabController，包含当前播放歌曲的大卡片（显示占位符、标题、艺术家，渐变背景）。两个标签页：Played（显示库中所有歌曲）和 Nexts（显示下一首待播放的歌曲）。每个列表项显示歌曲信息、5 颗星评分和收藏按钮。使用 ConsumerWidget 获取 PlayerProvider 和 LibraryProvider 数据。
 * *2026-02-17*: SearchPage UI 完成还原。重写为 StatefulWidget，包含搜索输入框（带提示文本和搜索/菜单图标）。当搜索为空时显示 Featured 部分（前 3 首歌）。用户输入时实时显示搜索结果，使用 LibraryProvider.searchSongs() 进行搜索。搜索结果分两种展示：网格布局（横向滚动卡片）和列表布局（详细项目）。点击任何歌曲卡片直接播放。无搜索结果时显示提示文本。
