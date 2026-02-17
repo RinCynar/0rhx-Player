@@ -28,10 +28,21 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[APPSHELL] initState called');
     // 初始化库数据库
     Future.microtask(() {
+      debugPrint('[APPSHELL] microtask executing, mounted=$mounted');
       if (mounted) {
-        context.read<LibraryProvider>().initialize();
+        debugPrint('[APPSHELL] Calling LibraryProvider.initialize()...');
+        context
+            .read<LibraryProvider>()
+            .initialize()
+            .then((_) {
+              debugPrint('[APPSHELL] LibraryProvider.initialize() completed');
+            })
+            .catchError((e) {
+              debugPrint('[APPSHELL] LibraryProvider.initialize() error: $e');
+            });
       }
     });
   }
@@ -39,7 +50,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomTitleBar(title: '0rhx Player'),
+      appBar: CustomTitleBar(title: '0thx Player'),
       body: Column(
         children: [
           Expanded(
@@ -47,7 +58,9 @@ class _AppShellState extends State<AppShell> {
               children: [
                 // NavigationRail
                 NavigationRail(
-                  selectedIndex: context.watch<NavigationProvider>().currentIndex,
+                  selectedIndex: context
+                      .watch<NavigationProvider>()
+                      .currentIndex,
                   onDestinationSelected: (index) {
                     context.read<NavigationProvider>().navigate(index);
                   },
@@ -64,7 +77,8 @@ class _AppShellState extends State<AppShell> {
                 ),
                 // Content Area
                 Expanded(
-                  child: _pages[context.watch<NavigationProvider>().currentIndex],
+                  child:
+                      _pages[context.watch<NavigationProvider>().currentIndex],
                 ),
               ],
             ),

@@ -17,12 +17,16 @@ class DatabaseService {
 
   /// 初始化数据库
   Future<void> initialize() async {
-    final dir = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
-      [SongSchema, AlbumSchema, ArtistSchema],
-      directory: dir.path,
-      inspector: true, // 仅在开发模式下启用检查器
-    );
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      _isar = await Isar.open(
+        [SongSchema, AlbumSchema, ArtistSchema],
+        directory: dir.path,
+        inspector: false, // 禁用检查器以加快启动
+      );
+    } catch (e) {
+      throw Exception('Database initialization failed: $e');
+    }
   }
 
   /// 获取 Isar 实例

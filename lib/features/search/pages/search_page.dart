@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../library/providers/library_provider.dart';
+import '../../library/models/song.dart';
+import '../../library/widgets/song_cover_image.dart';
 import '../../player/providers/player_provider.dart';
 
 class SearchPage extends StatefulWidget {
@@ -50,13 +52,17 @@ class _SearchPageState extends State<SearchPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
                   ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -68,85 +74,108 @@ class _SearchPageState extends State<SearchPage> {
             child: Consumer<LibraryProvider>(
               builder: (context, libraryProvider, _) {
                 final searchResults = _searchQuery.isEmpty
-                    ? <dynamic>[]
+                    ? <Song>[]
                     : libraryProvider.searchSongs(_searchQuery);
 
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Search results heading
-                        Text(
-                          'Search',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                return CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Search',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                         ),
-                        const SizedBox(height: 12),
+                      ),
+                    ),
 
-                        // Search results grid
-                        if (_searchQuery.isNotEmpty)
-                          Column(
+                    // Horizontal results grid (if any)
+                    if (_searchQuery.isNotEmpty && searchResults.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
                             children: [
                               SizedBox(
                                 height: 160,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: searchResults.length,
+                                  itemCount: searchResults.length > 5
+                                      ? 5
+                                      : searchResults.length,
                                   itemBuilder: (context, index) {
                                     final song = searchResults[index];
                                     return Padding(
+                                      key: ValueKey(
+                                        'search_horiz_${song.filePath}',
+                                      ),
                                       padding: const EdgeInsets.only(right: 12),
                                       child: _buildSmallSongCard(context, song),
                                     );
                                   },
                                 ),
                               ),
-                              if (searchResults.length > 4)
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () {},
-                                    child: Text(
-                                      'Show all',
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               const SizedBox(height: 24),
                             ],
                           ),
+                        ),
+                      ),
 
-                        // Featured section
-                        _buildSectionHeader(context, 'Featured'),
-                        const SizedBox(height: 12),
-                        if (_searchQuery.isEmpty)
-                          _buildFeaturedSection(context, libraryProvider)
-                        else if (searchResults.isEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Text(
-                                'No results found for "$_searchQuery"',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ),
-                          )
-                        else
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: searchResults.length,
-                            itemBuilder: (context, index) {
-                              final song = searchResults[index];
-                              return _buildListItem(context, song);
-                            },
-                          ),
-                      ],
+                    // Featured or List results
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverToBoxAdapter(
+                        child: _buildSectionHeader(context, 'Featured'),
+                      ),
                     ),
-                  ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+                    if (_searchQuery.isEmpty)
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: _buildFeaturedSectionSliver(
+                          context,
+                          libraryProvider,
+                        ),
+                      )
+                    else if (searchResults.isEmpty)
+                      SliverToBoxAdapter(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Text(
+                              'No results found for "$_searchQuery"',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final song = searchResults[index];
+                            return _buildListItem(
+                              context,
+                              song,
+                              key: ValueKey('search_list_${song.filePath}'),
+                            );
+                          }, childCount: searchResults.length),
+                        ),
+                      ),
+
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                  ],
                 );
               },
             ),
@@ -161,9 +190,9 @@ class _SearchPageState extends State<SearchPage> {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(width: 8),
         Icon(
@@ -188,24 +217,11 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SongCoverImage(
+                  coverArtPath: song.coverArtPath,
                   width: double.infinity,
                   height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withValues(alpha: 0.3),
-                  ),
-                  child: Icon(
-                    Icons.music_note,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.5),
-                    size: 30,
-                  ),
+                  borderRadius: 8,
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -222,58 +238,47 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildFeaturedSection(
-      BuildContext context, LibraryProvider libraryProvider) {
+  Widget _buildFeaturedSectionSliver(
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     final songs = libraryProvider.songs.take(3).toList();
 
     if (songs.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Text(
-            'No songs available',
-            style: Theme.of(context).textTheme.bodyMedium,
+      return SliverToBoxAdapter(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(
+              'No songs available',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ),
       );
     }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: songs.length,
-      itemBuilder: (context, index) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
         return _buildListItem(context, songs[index]);
-      },
+      }, childCount: songs.length),
     );
   }
 
-  Widget _buildListItem(BuildContext context, dynamic song) {
+  Widget _buildListItem(BuildContext context, dynamic song, {Key? key}) {
     return Card(
+      key: key,
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Icon/Placeholder
-            Container(
+            // Cover art image
+            SongCoverImage(
+              coverArtPath: song.coverArtPath,
               width: 50,
               height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withValues(alpha: 0.3),
-              ),
-              child: Icon(
-                Icons.music_note,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.5),
-                size: 20,
-              ),
+              borderRadius: 6,
             ),
             const SizedBox(width: 12),
             // Song info
@@ -293,11 +298,10 @@ class _SearchPageState extends State<SearchPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                 ],
               ),

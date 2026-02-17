@@ -56,8 +56,8 @@ dependencies:
   equatable: any
   path_provider: any
   
-  # Metadata Extraction
-  metadata_god: any
+  # Audio Metadata
+  audio_metadata_reader: any
 
 dev_dependencies:
   flutter_test:

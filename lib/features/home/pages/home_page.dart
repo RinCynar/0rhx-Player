@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../library/providers/library_provider.dart';
 import '../../player/providers/player_provider.dart';
+import '../../theme/providers/theme_provider.dart';
+import '../../settings/pages/settings_page.dart';
+import '../../library/widgets/song_cover_image.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -14,21 +17,24 @@ class HomePage extends StatelessWidget {
         title: const Text('0thx Player'),
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        titleTextStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {},
-        ),
+        titleTextStyle: Theme.of(
+          context,
+        ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
         actions: [
           IconButton(
             icon: const Icon(Icons.dark_mode),
-            onPressed: () {},
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
           ),
         ],
       ),
@@ -38,25 +44,38 @@ class HomePage extends StatelessWidget {
             return _buildEmptyState(context, libraryProvider);
           }
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Daily Mix section
-                  _buildSectionHeader(context, 'Daily Mix'),
-                  const SizedBox(height: 12),
-                  _buildHorizontalSongScroll(context, libraryProvider),
-                  const SizedBox(height: 32),
-
-                  // Section title
-                  _buildSectionHeader(context, 'Section title'),
-                  const SizedBox(height: 12),
-                  _buildArtistGrid(context, libraryProvider),
-                ],
+          return CustomScrollView(
+            slivers: [
+              // Daily Mix section
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: _buildSectionHeader(context, 'Daily Mix'),
+                ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildHorizontalSongScroll(context, libraryProvider),
+                ),
+              ),
+
+              // Section title
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: _buildSectionHeader(context, 'Section title'),
+                ),
+              ),
+
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: _buildArtistGridSliver(context, libraryProvider),
+              ),
+
+              // Bottom padding
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            ],
           );
         },
       ),
@@ -64,7 +83,9 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildEmptyState(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -90,34 +111,44 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(width: 8),
-        Icon(
-          Icons.arrow_forward,
-          size: 20,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ],
+    return InkWell(
+      onTap: () {},
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.arrow_forward_rounded,
+            size: 20,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildHorizontalSongScroll(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     return SizedBox(
-      height: 160,
+      height: 220,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: libraryProvider.songs.length,
         itemBuilder: (context, index) {
           final song = libraryProvider.songs[index];
           return Padding(
+            key: ValueKey('song_${song.filePath}'),
             padding: const EdgeInsets.only(right: 12),
             child: _buildSmallSongCard(context, song),
           );
@@ -127,69 +158,68 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildSmallSongCard(BuildContext context, dynamic song) {
-    return Card(
-      child: InkWell(
-        onTap: () {
-          _playSong(context, song);
-        },
-        child: SizedBox(
-          width: 120,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Placeholder image
-                Container(
-                  width: double.infinity,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withValues(alpha: 0.3),
-                  ),
-                  child: Icon(
-                    Icons.music_note,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.5),
-                    size: 30,
+    return SizedBox(
+      width: 140,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            ),
+            child: InkWell(
+              onTap: () => _playSong(context, song),
+              customBorder: const CircleBorder(),
+              child: Center(
+                child: ClipOval(
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: SongCoverImage(
+                      coverArtPath: song.coverArtPath,
+                      width: 100,
+                      height: 100,
+                      borderRadius: 0,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                // Title
-                Text(
-                  song.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+          Text(
+            song.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildArtistGrid(
-      BuildContext context, LibraryProvider libraryProvider) {
+  Widget _buildArtistGridSliver(
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     final songs = libraryProvider.songs;
-    final displayCount = (songs.length / 2).ceil();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    return SliverGrid.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
         childAspectRatio: 1.1,
       ),
-      itemCount: displayCount,
+      itemCount: songs.length,
       itemBuilder: (context, index) {
         final song = songs[index];
         return _buildArtistCard(context, song);
@@ -199,72 +229,67 @@ class HomePage extends StatelessWidget {
 
   Widget _buildArtistCard(BuildContext context, dynamic song) {
     return Card(
+      key: ValueKey('artist_song_${song.filePath}'),
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: InkWell(
-        onTap: () {
-          _playSong(context, song);
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Placeholder image
-              Container(
+        onTap: () => _playSong(context, song),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: SongCoverImage(
+                coverArtPath: song.coverArtPath,
                 width: double.infinity,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.3),
-                ),
-                child: Icon(
-                  Icons.music_note,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.5),
-                  size: 40,
-                ),
+                height: double.infinity,
+                borderRadius: 0,
               ),
-              // Artist info
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    song.artist ?? 'Unknown Artist',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    song.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
-                  ),
-                ],
-              ),
-              // Play button
-              Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: const Icon(Icons.play_circle),
-                  onPressed: () {
-                    _playSong(context, song);
-                  },
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            song.artist ?? 'Artist',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            song.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      onPressed: () => _playSong(context, song),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

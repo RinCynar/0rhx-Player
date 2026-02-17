@@ -4,23 +4,35 @@ import 'package:window_manager/window_manager.dart';
 
 class WindowConfig {
   static Future<void> initialize() async {
-    if (Platform.isWindows) {
+    debugPrint(
+      '[WINDOW] Initialize called, Platform.isWindows = ${Platform.isWindows}',
+    );
+    if (!Platform.isWindows) return;
+
+    try {
+      debugPrint('[WINDOW] Calling ensureInitialized...');
       await windowManager.ensureInitialized();
+      debugPrint('[WINDOW] ensureInitialized completed');
 
       const windowOptions = WindowOptions(
         size: Size(1280, 720),
         center: true,
-        backgroundColor: Colors.transparent,
         skipTaskbar: false,
         titleBarStyle: TitleBarStyle.hidden,
       );
 
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
+      debugPrint('[WINDOW] Configuring window...');
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        debugPrint('[WINDOW] Ready to show, showing window...');
         await windowManager.show();
         await windowManager.focus();
-        // Remove window frame for borderless effect
+        debugPrint('[WINDOW] Window shown and focused');
+
         await _setupBorderlessWindow();
+        debugPrint('[WINDOW] Borderless setup completed');
       });
+    } catch (e) {
+      debugPrint('[WINDOW] Initialization error: $e');
     }
   }
 

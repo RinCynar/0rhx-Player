@@ -24,66 +24,55 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: Column(
-        children: [
-          // Title bar with window controls
-          SizedBox(
-            height: 56,
-            child: Row(
-              children: [
-                // App title
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Text(
-                      widget.title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
+      child: SizedBox(
+        height: 56,
+        child: Row(
+          children: [
+            // App title
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                // Window control buttons
-                if (Platform.isWindows) ...[
-                  _WindowControlButton(
-                    icon: Icons.remove,
-                    tooltip: 'Minimize',
-                    onPressed: () async {
-                      await windowManager.minimize();
-                    },
-                  ),
-                  _WindowControlButton(
-                    icon: _isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
-                    tooltip: _isMaximized ? 'Restore' : 'Maximize',
-                    onPressed: () async {
-                      final isMaximized = await windowManager.isMaximized();
-                      if (isMaximized) {
-                        await windowManager.unmaximize();
-                      } else {
-                        await windowManager.maximize();
-                      }
-                      setState(() {
-                        _isMaximized = !_isMaximized;
-                      });
-                    },
-                  ),
-                  _WindowControlButton(
-                    icon: Icons.close,
-                    tooltip: 'Close',
-                    onPressed: () async {
-                      await windowManager.close();
-                    },
-                    isCloseButton: true,
-                  ),
-                ],
-              ],
+              ),
             ),
-          ),
-          // Divider
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ],
+            // Window control buttons
+            if (Platform.isWindows) ...[
+              _WindowControlButton(
+                icon: Icons.remove,
+                tooltip: 'Minimize',
+                onPressed: () async {
+                  await windowManager.minimize();
+                },
+              ),
+              _WindowControlButton(
+                icon: _isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
+                tooltip: _isMaximized ? 'Restore' : 'Maximize',
+                onPressed: () async {
+                  final isMaximized = await windowManager.isMaximized();
+                  if (isMaximized) {
+                    await windowManager.unmaximize();
+                  } else {
+                    await windowManager.maximize();
+                  }
+                  setState(() {
+                    _isMaximized = !_isMaximized;
+                  });
+                },
+              ),
+              _WindowControlButton(
+                icon: Icons.close,
+                tooltip: 'Close',
+                onPressed: () async {
+                  await windowManager.close();
+                },
+                isCloseButton: true,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

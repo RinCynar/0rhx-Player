@@ -21,21 +21,42 @@ class LibraryProvider extends ChangeNotifier {
   int get audioFileCount => _songs.length;
 
   /// 兼容旧 API
-  List<Map<String, String>> get audioFiles =>
-      _songs.map((song) => {'title': song.title, 'artist': song.artist ?? 'Unknown', 'path': song.filePath}).toList();
+  List<Map<String, String>> get audioFiles => _songs
+      .map(
+        (song) => {
+          'title': song.title,
+          'artist': song.artist ?? 'Unknown',
+          'path': song.filePath,
+        },
+      )
+      .toList();
 
   /// 初始化库（加载已保存的歌曲）
   Future<void> initialize() async {
-    if (_isInitialized) return;
+    debugPrint('[LIBRARY] initialize() called, _isInitialized=$_isInitialized');
+    if (_isInitialized) {
+      debugPrint('[LIBRARY] Already initialized, returning');
+      return;
+    }
 
     try {
+      debugPrint('[LIBRARY] Calling DatabaseService.initialize()...');
       await _dbService.initialize();
-      _songs.addAll(await _dbService.getAllSongs());
+      debugPrint('[LIBRARY] Database initialized, loading songs...');
+
+      final songs = await _dbService.getAllSongs();
+      debugPrint('[LIBRARY] Loaded ${songs.length} songs from database');
+
+      _songs.addAll(songs);
       _isInitialized = true;
+      _errorMessage = null;
+      debugPrint('[LIBRARY] Library initialization completed');
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Database initialization failed: $e';
-      _isInitialized = false;
+      // 数据库失败时，使用内存模式
+      debugPrint('[LIBRARY] Database error: $e, using in-memory mode');
+      _isInitialized = true;
+      _errorMessage = 'Database unavailable: running in memory-only mode';
       notifyListeners();
     }
   }
@@ -61,7 +82,7 @@ class LibraryProvider extends ChangeNotifier {
     _musicDirectories.remove(folderPath);
     _errorMessage = null;
     notifyListeners();
-    
+
     // Rescan library without this folder
     _rescanLibrary();
   }
@@ -80,7 +101,7 @@ class LibraryProvider extends ChangeNotifier {
 
       _songs.clear();
       final newSongs = <Song>[];
-      
+
       // Guard: 无扫描目录时返回
       if (_musicDirectories.isEmpty) {
         debugPrint('No music directories configured');
@@ -89,55 +110,67 @@ class LibraryProvider extends ChangeNotifier {
         return;
       }
 
+      final List<String> allFilePaths = [];
       for (final directory in _musicDirectories) {
         try {
           final files = await _scannerService.scanDirectory(directory);
-          debugPrint('Found ${files.length} files in $directory');
-          
-          for (final filePath in files) {
-            try {
-              final metadata = await _scannerService.getFileMetadata(filePath);
-              
-              // Guard: 无效的元数据时跳过
-              if (metadata.isEmpty || (metadata['title'] ?? '').isEmpty) {
-                debugPrint('Skipping file with invalid metadata: $filePath');
-                continue;
-              }
-              
-              // 计算时长字符串（MM:SS）
-              final durationMs = int.tryParse(metadata['duration'] ?? '0') ?? 0;
-              final seconds = durationMs ~/ 1000;
-              final minutes = seconds ~/ 60;
-              final remainingSeconds = seconds % 60;
-              final durationStr = '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
-              
-              // 创建 Song 对象并添加到列表
-              final song = Song(
-                title: metadata['title'] ?? 'Unknown',
-                filePath: filePath,
-                artist: metadata['artist'],
-                album: metadata['album'],
-                genre: metadata['genre'],
-                duration: durationStr,
-                durationMs: durationMs,
-                dateAdded: DateTime.now(),
-              );
-              newSongs.add(song);
-            } catch (e) {
-              debugPrint('Error processing file $filePath: $e');
-              // 继续处理下一个文件
-            }
-          }
+          allFilePaths.addAll(files);
         } catch (e) {
           debugPrint('Error scanning directory $directory: $e');
-          // 继续处理下一个目录
+        }
+      }
+
+      if (allFilePaths.isEmpty) {
+        _isScanning = false;
+        notifyListeners();
+        return;
+      }
+
+      // Extract metadata in batch (runs in background isolate)
+      final metadataList = await _scannerService.getMultipleFilesMetadata(
+        allFilePaths,
+      );
+
+      final currentNewSongs = <Song>[];
+      for (int i = 0; i < metadataList.length; i++) {
+        final metadata = metadataList[i];
+        final filePath = allFilePaths[i];
+
+        if (metadata.isEmpty || (metadata['title'] ?? '').isEmpty) continue;
+
+        // 计算时长字符串（MM:SS）
+        final durationMs = int.tryParse(metadata['duration'] ?? '0') ?? 0;
+        final seconds = durationMs ~/ 1000;
+        final minutes = seconds ~/ 60;
+        final remainingSeconds = seconds % 60;
+        final durationStr =
+            '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+
+        final song = Song(
+          title: metadata['title'] ?? 'Unknown',
+          filePath: filePath,
+          artist: metadata['artist'],
+          album: metadata['album'],
+          genre: metadata['genre'],
+          duration: durationStr,
+          durationMs: durationMs,
+          coverArtPath: metadata['coverArtPath'],
+          dateAdded: DateTime.now(),
+        );
+        currentNewSongs.add(song);
+
+        // 每 20 个文件通知一次 UI，或者最后一次
+        if (currentNewSongs.length % 20 == 0 || i == metadataList.length - 1) {
+          _songs.clear();
+          _songs.addAll(currentNewSongs);
+          notifyListeners();
         }
       }
 
       // 批量保存到数据库（去重：通过文件路径）
-      if (newSongs.isNotEmpty) {
+      if (currentNewSongs.isNotEmpty) {
         try {
-          await _dbService.addSongs(newSongs);
+          await _dbService.addSongs(currentNewSongs);
         } catch (e) {
           _errorMessage = 'Database save failed: $e';
           debugPrint('Database save error: $e');
@@ -187,20 +220,24 @@ class LibraryProvider extends ChangeNotifier {
   List<Song> searchSongs(String query) {
     final lowerQuery = query.toLowerCase();
     return _songs
-        .where((song) =>
-            song.title.toLowerCase().contains(lowerQuery) ||
-            (song.artist?.toLowerCase().contains(lowerQuery) ?? false))
+        .where(
+          (song) =>
+              song.title.toLowerCase().contains(lowerQuery) ||
+              (song.artist?.toLowerCase().contains(lowerQuery) ?? false),
+        )
         .toList();
   }
 
   /// Search audio files (兼容旧 API)
   List<Map<String, String>> searchAudioFiles(String query) {
     return searchSongs(query)
-        .map((song) => {
-              'title': song.title,
-              'artist': song.artist ?? 'Unknown',
-              'path': song.filePath,
-            })
+        .map(
+          (song) => {
+            'title': song.title,
+            'artist': song.artist ?? 'Unknown',
+            'path': song.filePath,
+          },
+        )
         .toList();
   }
 }

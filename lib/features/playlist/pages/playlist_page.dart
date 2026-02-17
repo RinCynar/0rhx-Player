@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../player/providers/player_provider.dart';
 import '../../library/providers/library_provider.dart';
 import '../../library/models/song.dart';
+import '../../library/widgets/song_cover_image.dart';
 
 class PlaylistPage extends StatefulWidget {
   const PlaylistPage({super.key});
@@ -38,142 +39,156 @@ class _PlaylistPageState extends State<PlaylistPage>
             padding: const EdgeInsets.all(12),
             child: Align(
               alignment: Alignment.topLeft,
-              child: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {},
-              ),
+              child: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
             ),
           ),
           // Current playing track card
           Expanded(
-            child: Consumer<PlayerProvider>(
-              builder: (context, playerProvider, _) {
+            child: Consumer2<PlayerProvider, LibraryProvider>(
+              builder: (context, playerProvider, libraryProvider, _) {
                 final currentTrackTitle =
                     playerProvider.currentTrackTitle ?? 'Now Playing';
                 final currentTrackArtist =
                     playerProvider.currentTrackArtist ?? 'Artists';
 
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        // Now Playing Card
-                        Container(
-                          width: double.infinity,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withValues(alpha: 0.4),
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withValues(alpha: 0.1),
+                // Get current playing song for cover art
+                final currentSong = libraryProvider.songs.isNotEmpty
+                    ? libraryProvider.songs.first
+                    : null;
+
+                return NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverPadding(
+                        padding: const EdgeInsets.all(16),
+                        sliver: SliverToBoxAdapter(
+                          child: _buildNowPlayingCard(
+                            context,
+                            currentSong,
+                            currentTrackTitle,
+                            currentTrackArtist,
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.2),
+                            ),
+                            child: TabBar(
+                              controller: _tabController,
+                              tabs: const [
+                                Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('Played'),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('Nexts'),
+                                ),
                               ],
                             ),
                           ),
-                          child: Stack(
-                            children: [
-                              // Icon placeholder
-                              Center(
-                                child: Icon(
-                                  Icons.music_note,
-                                  size: 80,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.3),
-                                ),
-                              ),
-                              // Title and artist overlay
-                              Positioned(
-                                bottom: 20,
-                                left: 20,
-                                right: 20,
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      currentTrackTitle,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      currentTrackArtist,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: Colors.white70,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                        const SizedBox(height: 20),
-                        // Tabs: Played / Nexts
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: 0.2),
-                          ),
-                          child: TabBar(
-                            controller: _tabController,
-                            tabs: const [
-                              Padding(
-                                padding: EdgeInsets.all(12),
-                                child: Text('Played'),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(12),
-                                child: Text('Nexts'),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Playlist content
-                        SizedBox(
-                          height: 300,
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              // Played tab
-                              _buildPlayedTab(context),
-                              // Nexts tab
-                              _buildNextsTab(context),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    ];
+                  },
+                  body: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildPlayedTab(context),
+                      _buildNextsTab(context),
+                    ],
                   ),
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNowPlayingCard(
+    BuildContext context,
+    Song? currentSong,
+    String currentTrackTitle,
+    String currentTrackArtist,
+  ) {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.4),
+            Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.1),
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Cover art or placeholder
+          currentSong != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SongCoverImage(
+                    coverArtPath: currentSong.coverArtPath,
+                    width: double.infinity,
+                    height: 200,
+                    borderRadius: 0,
+                  ),
+                )
+              : Center(
+                  child: Icon(
+                    Icons.music_note,
+                    size: 80,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+          // Title and artist overlay
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentTrackTitle,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  currentTrackArtist,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -198,7 +213,12 @@ class _PlaylistPageState extends State<PlaylistPage>
         return ListView.builder(
           itemCount: songs.length,
           itemBuilder: (context, index) {
-            return _buildPlaylistItem(context, songs[index]);
+            final song = songs[index];
+            return _buildPlaylistItem(
+              context,
+              song,
+              key: ValueKey('played_${song.filePath}'),
+            );
           },
         );
       },
@@ -210,19 +230,7 @@ class _PlaylistPageState extends State<PlaylistPage>
       builder: (context, libraryProvider, _) {
         final songs = libraryProvider.songs;
 
-        if (songs.isEmpty) {
-          return Center(
-            child: Text(
-              'No upcoming songs',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          );
-        }
-
-        // Show next songs (skip first one)
-        final nextSongs = songs.length > 1 ? songs.sublist(1) : [];
-
-        if (nextSongs.isEmpty) {
+        if (songs.isEmpty || songs.length <= 1) {
           return Center(
             child: Text(
               'No upcoming songs',
@@ -232,17 +240,24 @@ class _PlaylistPageState extends State<PlaylistPage>
         }
 
         return ListView.builder(
-          itemCount: nextSongs.length,
+          itemCount: songs.length - 1,
           itemBuilder: (context, index) {
-            return _buildPlaylistItem(context, nextSongs[index]);
+            // Offset by 1 to skip first song
+            final song = songs[index + 1];
+            return _buildPlaylistItem(
+              context,
+              song,
+              key: ValueKey('next_${song.filePath}'),
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildPlaylistItem(BuildContext context, Song song) {
+  Widget _buildPlaylistItem(BuildContext context, Song song, {Key? key}) {
     return Container(
+      key: key,
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         border: Border(
@@ -255,25 +270,12 @@ class _PlaylistPageState extends State<PlaylistPage>
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            // Icon placeholder
-            Container(
+            // Cover art image
+            SongCoverImage(
+              coverArtPath: song.coverArtPath,
               width: 50,
               height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withValues(alpha: 0.3),
-              ),
-              child: Icon(
-                Icons.music_note,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.5),
-                size: 20,
-              ),
+              borderRadius: 6,
             ),
             const SizedBox(width: 12),
             // Song info
@@ -293,11 +295,10 @@ class _PlaylistPageState extends State<PlaylistPage>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                 ],
               ),
@@ -311,10 +312,9 @@ class _PlaylistPageState extends State<PlaylistPage>
                   (index) => Icon(
                     Icons.star,
                     size: 16,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(width: 8),

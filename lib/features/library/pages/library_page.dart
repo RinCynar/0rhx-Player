@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/library_provider.dart';
 import '../models/song.dart';
 import '../widgets/folder_picker_dialog.dart';
+import '../widgets/song_cover_image.dart';
 import '../../player/providers/player_provider.dart';
 
 class LibraryPage extends StatefulWidget {
@@ -48,10 +49,7 @@ class _LibraryPageState extends State<LibraryPage>
           onPressed: () {},
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
       body: Column(
@@ -136,7 +134,9 @@ class _LibraryPageState extends State<LibraryPage>
   }
 
   Widget _buildTabContent(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     return TabBarView(
       controller: _tabController,
       physics: const NeverScrollableScrollPhysics(),
@@ -154,7 +154,9 @@ class _LibraryPageState extends State<LibraryPage>
   }
 
   Widget _buildTitlesTab(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     final songs = libraryProvider.songs;
 
     if (songs.isEmpty) {
@@ -165,13 +167,12 @@ class _LibraryPageState extends State<LibraryPage>
             Icon(
               Icons.music_note,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              'No Songs',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('No Songs', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               'Add a folder to discover music',
@@ -216,29 +217,29 @@ class _LibraryPageState extends State<LibraryPage>
   }
 
   Widget _buildArtistsTab(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     // TODO: Implement artists view
     return Center(
-      child: Text(
-        'Artists View',
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
+      child: Text('Artists View', style: Theme.of(context).textTheme.bodyLarge),
     );
   }
 
   Widget _buildAlbumsTab(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     // TODO: Implement albums view
     return Center(
-      child: Text(
-        'Albums View',
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
+      child: Text('Albums View', style: Theme.of(context).textTheme.bodyLarge),
     );
   }
 
   Widget _buildFoldersTab(
-      BuildContext context, LibraryProvider libraryProvider) {
+    BuildContext context,
+    LibraryProvider libraryProvider,
+  ) {
     final folders = libraryProvider.musicDirectories;
 
     if (folders.isEmpty) {
@@ -249,13 +250,12 @@ class _LibraryPageState extends State<LibraryPage>
             Icon(
               Icons.folder_open,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              'No Folders',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('No Folders', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               'Add a folder to scan for music',
@@ -290,6 +290,7 @@ class _LibraryPageState extends State<LibraryPage>
           final folderName = folderPath.split('\\').last;
 
           return Card(
+            key: ValueKey('folder_$folderPath'),
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: const Icon(Icons.folder),
@@ -316,6 +317,7 @@ class _LibraryPageState extends State<LibraryPage>
     final dateText = _getDateText(song.dateAdded);
 
     return Card(
+      key: ValueKey('lib_song_${song.filePath}'),
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () {
@@ -326,25 +328,12 @@ class _LibraryPageState extends State<LibraryPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Placeholder image
-              Container(
+              // Cover art image
+              SongCoverImage(
+                coverArtPath: song.coverArtPath,
                 width: double.infinity,
                 height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.3),
-                ),
-                child: Icon(
-                  Icons.music_note,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.5),
-                  size: 40,
-                ),
+                borderRadius: 8,
               ),
               const SizedBox(height: 8),
               // Title
@@ -359,11 +348,10 @@ class _LibraryPageState extends State<LibraryPage>
               Text(
                 dateText,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
             ],
           ),

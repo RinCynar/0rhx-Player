@@ -293,11 +293,6 @@ void Win32Window::UpdateTheme(HWND const window) {
 }
 
 void Win32Window::EnableBorderless(HWND const window) {
-  // Extended window style for borderless appearance
-  DWORD exStyle = GetWindowLong(window, GWL_EXSTYLE);
-  exStyle |= WS_EX_LAYERED;  // Enable layered window for transparency support
-  SetWindowLong(window, GWL_EXSTYLE, exStyle);
-  
   // Extend the frame into the client area to hide the window frame
   MARGINS margins = {-1, -1, -1, -1};
   DwmExtendFrameIntoClientArea(window, &margins);

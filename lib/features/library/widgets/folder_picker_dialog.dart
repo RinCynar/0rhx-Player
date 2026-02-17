@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class FolderPickerDialog extends StatefulWidget {
@@ -28,13 +29,24 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
 
   String _getInitialPath() {
     if (Platform.isWindows) {
-      // Get Documents folder on Windows
+      // Get Music folder on Windows
       final username = Platform.environment['USERNAME'] ?? 'User';
       return 'C:\\Users\\$username\\Music';
     } else if (Platform.isLinux) {
       return Platform.environment['HOME'] ?? '/home';
     } else {
       return '/';
+    }
+  }
+
+  Future<void> _pickFolderWithFilePicker() async {
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory != null) {
+      widget.onFolderSelected(selectedDirectory);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -129,6 +141,11 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
+        ),
+        ElevatedButton.icon(
+          onPressed: _pickFolderWithFilePicker,
+          icon: const Icon(Icons.folder_open),
+          label: const Text('Browse'),
         ),
         ElevatedButton(
           onPressed: () {

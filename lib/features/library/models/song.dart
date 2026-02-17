@@ -42,6 +42,9 @@ class Song {
   /// 修改时间
   DateTime? dateModified;
 
+  /// 封面艺术文件路径（在应用缓存目录中）
+  String? coverArtPath;
+
   Song({
     required this.title,
     required this.filePath,
@@ -55,5 +58,6 @@ class Song {
     this.lastPlayedAt,
     required this.dateAdded,
     this.dateModified,
+    this.coverArtPath,
   });
 }

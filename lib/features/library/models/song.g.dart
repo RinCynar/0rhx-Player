@@ -27,53 +27,58 @@ const SongSchema = CollectionSchema(
       name: r'artist',
       type: IsarType.string,
     ),
-    r'dateAdded': PropertySchema(
+    r'coverArtPath': PropertySchema(
       id: 2,
+      name: r'coverArtPath',
+      type: IsarType.string,
+    ),
+    r'dateAdded': PropertySchema(
+      id: 3,
       name: r'dateAdded',
       type: IsarType.dateTime,
     ),
     r'dateModified': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'dateModified',
       type: IsarType.dateTime,
     ),
     r'duration': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'duration',
       type: IsarType.string,
     ),
     r'durationMs': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'durationMs',
       type: IsarType.long,
     ),
     r'filePath': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'filePath',
       type: IsarType.string,
     ),
     r'genre': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'genre',
       type: IsarType.string,
     ),
     r'isFavorite': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'isFavorite',
       type: IsarType.bool,
     ),
     r'lastPlayedAt': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'lastPlayedAt',
       type: IsarType.dateTime,
     ),
     r'playCount': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'playCount',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'title',
       type: IsarType.string,
     )
@@ -110,6 +115,12 @@ int _songEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.coverArtPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.duration.length * 3;
   bytesCount += 3 + object.filePath.length * 3;
   {
@@ -130,16 +141,17 @@ void _songSerialize(
 ) {
   writer.writeString(offsets[0], object.album);
   writer.writeString(offsets[1], object.artist);
-  writer.writeDateTime(offsets[2], object.dateAdded);
-  writer.writeDateTime(offsets[3], object.dateModified);
-  writer.writeString(offsets[4], object.duration);
-  writer.writeLong(offsets[5], object.durationMs);
-  writer.writeString(offsets[6], object.filePath);
-  writer.writeString(offsets[7], object.genre);
-  writer.writeBool(offsets[8], object.isFavorite);
-  writer.writeDateTime(offsets[9], object.lastPlayedAt);
-  writer.writeLong(offsets[10], object.playCount);
-  writer.writeString(offsets[11], object.title);
+  writer.writeString(offsets[2], object.coverArtPath);
+  writer.writeDateTime(offsets[3], object.dateAdded);
+  writer.writeDateTime(offsets[4], object.dateModified);
+  writer.writeString(offsets[5], object.duration);
+  writer.writeLong(offsets[6], object.durationMs);
+  writer.writeString(offsets[7], object.filePath);
+  writer.writeString(offsets[8], object.genre);
+  writer.writeBool(offsets[9], object.isFavorite);
+  writer.writeDateTime(offsets[10], object.lastPlayedAt);
+  writer.writeLong(offsets[11], object.playCount);
+  writer.writeString(offsets[12], object.title);
 }
 
 Song _songDeserialize(
@@ -151,16 +163,17 @@ Song _songDeserialize(
   final object = Song(
     album: reader.readStringOrNull(offsets[0]),
     artist: reader.readStringOrNull(offsets[1]),
-    dateAdded: reader.readDateTime(offsets[2]),
-    dateModified: reader.readDateTimeOrNull(offsets[3]),
-    duration: reader.readString(offsets[4]),
-    durationMs: reader.readLong(offsets[5]),
-    filePath: reader.readString(offsets[6]),
-    genre: reader.readStringOrNull(offsets[7]),
-    isFavorite: reader.readBoolOrNull(offsets[8]) ?? false,
-    lastPlayedAt: reader.readDateTimeOrNull(offsets[9]),
-    playCount: reader.readLongOrNull(offsets[10]) ?? 0,
-    title: reader.readString(offsets[11]),
+    coverArtPath: reader.readStringOrNull(offsets[2]),
+    dateAdded: reader.readDateTime(offsets[3]),
+    dateModified: reader.readDateTimeOrNull(offsets[4]),
+    duration: reader.readString(offsets[5]),
+    durationMs: reader.readLong(offsets[6]),
+    filePath: reader.readString(offsets[7]),
+    genre: reader.readStringOrNull(offsets[8]),
+    isFavorite: reader.readBoolOrNull(offsets[9]) ?? false,
+    lastPlayedAt: reader.readDateTimeOrNull(offsets[10]),
+    playCount: reader.readLongOrNull(offsets[11]) ?? 0,
+    title: reader.readString(offsets[12]),
   );
   object.id = id;
   return object;
@@ -178,24 +191,26 @@ P _songDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readDateTime(offset)) as P;
-    case 3:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 4:
-      return (reader.readString(offset)) as P;
-    case 5:
-      return (reader.readLong(offset)) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
       return (reader.readStringOrNull(offset)) as P;
-    case 8:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 9:
+    case 3:
+      return (reader.readDateTime(offset)) as P;
+    case 4:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 10:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 11:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 12:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -573,6 +588,152 @@ extension SongQueryFilter on QueryBuilder<Song, Song, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'artist',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'coverArtPath',
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'coverArtPath',
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'coverArtPath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'coverArtPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'coverArtPath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'coverArtPath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterFilterCondition> coverArtPathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'coverArtPath',
         value: '',
       ));
     });
@@ -1495,6 +1656,18 @@ extension SongQuerySortBy on QueryBuilder<Song, Song, QSortBy> {
     });
   }
 
+  QueryBuilder<Song, Song, QAfterSortBy> sortByCoverArtPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverArtPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterSortBy> sortByCoverArtPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverArtPath', Sort.desc);
+    });
+  }
+
   QueryBuilder<Song, Song, QAfterSortBy> sortByDateAdded() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dateAdded', Sort.asc);
@@ -1638,6 +1811,18 @@ extension SongQuerySortThenBy on QueryBuilder<Song, Song, QSortThenBy> {
   QueryBuilder<Song, Song, QAfterSortBy> thenByArtistDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'artist', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterSortBy> thenByCoverArtPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverArtPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Song, Song, QAfterSortBy> thenByCoverArtPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'coverArtPath', Sort.desc);
     });
   }
 
@@ -1789,6 +1974,13 @@ extension SongQueryWhereDistinct on QueryBuilder<Song, Song, QDistinct> {
     });
   }
 
+  QueryBuilder<Song, Song, QDistinct> distinctByCoverArtPath(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'coverArtPath', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Song, Song, QDistinct> distinctByDateAdded() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dateAdded');
@@ -1870,6 +2062,12 @@ extension SongQueryProperty on QueryBuilder<Song, Song, QQueryProperty> {
   QueryBuilder<Song, String?, QQueryOperations> artistProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'artist');
+    });
+  }
+
+  QueryBuilder<Song, String?, QQueryOperations> coverArtPathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'coverArtPath');
     });
   }
 
