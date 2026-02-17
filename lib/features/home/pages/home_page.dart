@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../library/providers/library_provider.dart';
+import '../../player/providers/player_provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -129,7 +130,7 @@ class HomePage extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          // TODO: Play song
+          _playSong(context, song);
         },
         child: SizedBox(
           width: 120,
@@ -200,7 +201,7 @@ class HomePage extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          // TODO: Play artist
+          _playSong(context, song);
         },
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -258,7 +259,7 @@ class HomePage extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.play_circle),
                   onPressed: () {
-                    // TODO: Play song
+                    _playSong(context, song);
                   },
                 ),
               ),
@@ -267,5 +268,15 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _playSong(BuildContext context, dynamic song) {
+    final playerProvider = context.read<PlayerProvider>();
+    playerProvider.loadTrack(
+      song.filePath,
+      title: song.title,
+      artist: song.artist ?? 'Unknown Artist',
+    );
+    playerProvider.play();
   }
 }

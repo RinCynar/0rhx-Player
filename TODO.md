@@ -32,9 +32,13 @@
     - [x] 完善 LibraryPage UI（按照 Design/Desktop/library.png）
     - [x] 完善 HomePage UI（按照 Design/Desktop/home.png）
 
-- [ ] **播放功能实现**
-    - [ ] 实现点击歌曲时加载到播放器并播放
-    - [ ] 更新 MiniPlayer 显示当前播放歌曲信息
+- [x] **播放功能实现**
+    - [x] 实现点击歌曲时加载到播放器并播放
+    - [x] 更新 MiniPlayer 显示当前播放歌曲信息
+
+- [ ] **搜索功能实现**
+    - [ ] 完善 SearchPage UI（按照 Design/Desktop/search.png）
+    - [ ] 实现搜索歌曲功能
 
 ## 🔮 Future Tasks (Backlog)
 
@@ -48,6 +52,7 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
+* *2026-02-17*: 播放功能实现完成。在 HomePage 和 LibraryPage 中添加 `_playSong()` 方法，点击歌曲卡片时调用 PlayerProvider.loadTrack() 加载歌曲文件并传入标题和艺术家，然后调用 PlayerProvider.play() 播放。MiniPlayer 已正确绑定 PlayerProvider，自动显示当前播放歌曲的 title 和 artist 信息。播放/暂停按钮已集成到 MiniPlayer。
 * *2026-02-17*: HomePage UI 完成还原。重写为 StatelessWidget，包含 AppBar（标题、菜单、设置）和主内容区。主内容分为两部分：Daily Mix（横向滚动小卡片，显示歌曲占位符和标题）和 Section title（2 列网格的大卡片，显示艺术家/歌曲信息和播放按钮）。使用 Consumer<LibraryProvider> 获取歌曲数据，支持库为空时的空状态显示。
 * *2026-02-17*: LibraryPage UI 完成还原。重写为 StatefulWidget with TabController，支持 4 个标签页（Titles、Artists、Albums、Folders）。Titles 标签页显示网格布局的歌曲卡片（5 列），每个卡片显示占位符图标、标题、更新时间。Folders 标签页显示已添加文件夹列表。Artists 和 Albums 标签页预留待实现。支持点击卡片播放歌曲、删除文件夹等交互。
 * *2026-02-17*: DatabaseService 集成到 LibraryProvider 完成。LibraryProvider 现在在初始化时调用 DatabaseService.initialize() 加载已保存歌曲，扫描新文件时创建 Song 对象并批量保存到数据库。AppShell 改为 StatefulWidget，在 initState 中初始化库。提供 songs 属性和 searchSongs() 方法供 UI 直接使用，兼容旧的 audioFiles API。

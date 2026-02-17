@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/library_provider.dart';
 import '../models/song.dart';
 import '../widgets/folder_picker_dialog.dart';
+import '../../player/providers/player_provider.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -318,7 +319,7 @@ class _LibraryPageState extends State<LibraryPage>
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () {
-          // TODO: Play song
+          _playSong(context, song);
         },
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -385,5 +386,15 @@ class _LibraryPageState extends State<LibraryPage>
       final daysAgo = today.difference(date).inDays;
       return 'Updated $daysAgo days ago';
     }
+  }
+
+  void _playSong(BuildContext context, Song song) {
+    final playerProvider = context.read<PlayerProvider>();
+    playerProvider.loadTrack(
+      song.filePath,
+      title: song.title,
+      artist: song.artist ?? 'Unknown Artist',
+    );
+    playerProvider.play();
   }
 }
