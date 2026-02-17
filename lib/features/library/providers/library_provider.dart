@@ -87,6 +87,13 @@ class LibraryProvider extends ChangeNotifier {
         for (final filePath in files) {
           final metadata = await _scannerService.getFileMetadata(filePath);
           
+          // 计算时长字符串（MM:SS）
+          final durationMs = int.tryParse(metadata['duration'] ?? '0') ?? 0;
+          final seconds = durationMs ~/ 1000;
+          final minutes = seconds ~/ 60;
+          final remainingSeconds = seconds % 60;
+          final durationStr = '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+          
           // 创建 Song 对象并添加到列表
           final song = Song(
             title: metadata['title'] ?? 'Unknown',
@@ -94,8 +101,8 @@ class LibraryProvider extends ChangeNotifier {
             artist: metadata['artist'],
             album: metadata['album'],
             genre: metadata['genre'],
-            duration: metadata['duration'] ?? '0:00',
-            durationMs: int.tryParse(metadata['durationMs'] ?? '0') ?? 0,
+            duration: durationStr,
+            durationMs: durationMs,
             dateAdded: DateTime.now(),
           );
           newSongs.add(song);

@@ -44,9 +44,13 @@
     - [x] 完善 PlaylistPage UI（按照 Design/Desktop/playlist.png）
     - [x] 实现播放列表功能
 
-- [ ] **音乐元数据提取**
-    - [ ] 集成元数据库（如 metadata_god 或 audio_metadata_reader）获取真实的曲名、艺术家、时长
-    - [ ] 更新扫描时的文件元数据提取逻辑
+- [x] **音乐元数据提取**
+    - [x] 优化扫描时的文件元数据提取逻辑（准备框架）
+    - [ ] 集成元数据库获取真实的曲名、艺术家、时长（需选择合适的库）
+
+- [ ] **Phase 1 完成度检查**
+    - [ ] 测试所有功能是否正常工作
+    - [ ] 处理已知的 bug 和边界情况
 
 ## 🔮 Future Tasks (Backlog)
 
@@ -60,6 +64,7 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
+* *2026-02-17*: 音乐元数据提取框架优化完成。调整 FileScannerService.getFileMetadata() 方法为返回字典结构（title, artist, duration, album, genre），duration 字段现为毫秒单位字符串。LibraryProvider.scanLibrary() 已更新以处理毫秒时长并转换为 MM:SS 格式。准备好集成具体的元数据提取库（如 audio_metadata_reader 或 metadata_god），但暂未集成以避免依赖兼容性问题。
 * *2026-02-17*: PlaylistPage UI 完成还原。重写为 StatefulWidget with TabController，包含当前播放歌曲的大卡片（显示占位符、标题、艺术家，渐变背景）。两个标签页：Played（显示库中所有歌曲）和 Nexts（显示下一首待播放的歌曲）。每个列表项显示歌曲信息、5 颗星评分和收藏按钮。使用 ConsumerWidget 获取 PlayerProvider 和 LibraryProvider 数据。
 * *2026-02-17*: SearchPage UI 完成还原。重写为 StatefulWidget，包含搜索输入框（带提示文本和搜索/菜单图标）。当搜索为空时显示 Featured 部分（前 3 首歌）。用户输入时实时显示搜索结果，使用 LibraryProvider.searchSongs() 进行搜索。搜索结果分两种展示：网格布局（横向滚动卡片）和列表布局（详细项目）。点击任何歌曲卡片直接播放。无搜索结果时显示提示文本。
 * *2026-02-17*: 播放功能实现完成。在 HomePage 和 LibraryPage 中添加 `_playSong()` 方法，点击歌曲卡片时调用 PlayerProvider.loadTrack() 加载歌曲文件并传入标题和艺术家，然后调用 PlayerProvider.play() 播放。MiniPlayer 已正确绑定 PlayerProvider，自动显示当前播放歌曲的 title 和 artist 信息。播放/暂停按钮已集成到 MiniPlayer。

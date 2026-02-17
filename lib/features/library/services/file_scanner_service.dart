@@ -50,13 +50,18 @@ class FileScannerService {
   Future<Map<String, String>> getFileMetadata(String filePath) async {
     try {
       final file = File(filePath);
-      final name = file.path.split(Platform.pathSeparator).last;
-      final parts = name.split('.');
-      final title = parts.length > 1 ? parts.sublist(0, parts.length - 1).join('.') : name;
+      final fileName = file.path.split(Platform.pathSeparator).last;
+      final parts = fileName.split('.');
+      final defaultTitle = parts.length > 1 ? parts.sublist(0, parts.length - 1).join('.') : fileName;
 
+      // Return basic metadata from filename
+      // TODO: Integrate proper metadata extraction library in future
       return {
-        'title': title,
+        'title': defaultTitle,
         'artist': 'Unknown',
+        'duration': '0',
+        'album': 'Unknown',
+        'genre': 'Unknown',
         'path': filePath,
       };
     } catch (e) {
