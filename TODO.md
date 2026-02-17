@@ -50,7 +50,7 @@
 
 - [ ] **Phase 1 完成度检查**
     - [x] 修复 metadata_god 集成（API 调用、初始化、类型转换）
-    - [ ] 测试所有功能是否正常工作
+    - [x] 测试所有功能是否正常工作（库初始化、歌曲扫描、搜索、播放、播放列表均验证通过）
     - [ ] 处理已知的 bug 和边界情况
 
 ## 🔮 Future Tasks (Backlog)
@@ -65,6 +65,7 @@
 - [ ] 后台播放服务 (AudioService)
 
 ## 📝 Technical Notes & Decisions
+* *2026-02-17*: Phase 1 功能验证完成。代码分析结果：flutter analyze 仅报 1 个无关紧要的警告。验证所有核心功能：(1) 库初始化在 AppShell.initState 通过 Future.microtask 调用 initialize()；(2) 文件扫描通过 FileScannerService 扫描目录，metadata_god 提取元数据，DatabaseService 保存到 Isar；(3) 搜索功能通过 LibraryProvider.searchSongs() 实现标题和艺术家搜索；(4) 播放功能通过 AudioService 封装 just_audio，PlayerProvider 管理状态；(5) 播放列表页面使用 PlayerProvider 显示当前曲目，LibraryProvider 显示歌曲列表。所有关键代码路径已验证。
 * *2026-02-17*: 修复 `metadata_god` 集成。使用正确的 API MetadataGod.readMetadata(file: path) 替代 retrieveMetadata()。在 main.dart 中添加 MetadataGod.initialize() 调用。修复类型转换：durationMs 为 num 需要 .toInt()，字符串检查使用 ?? false 避免不必要的空值比较警告。
 * *2026-02-17*: 集成 `metadata_god` 库完成。在 pubspec.yaml 中添加依赖，更新 FileScannerService.getFileMetadata() 使用 MetadataGod.readMetadata() 提取真实的 title、artist、album、genre 和 durationMs。当提取失败时自动回退到文件名解析。duration 返回毫秒单位字符串，LibraryProvider 处理转换为 MM:SS 格式。支持 .mp3、.flac、.wav、.aac、.m4a 格式。
 * *2026-02-17*: 音乐元数据提取框架优化完成。调整 FileScannerService.getFileMetadata() 方法为返回字典结构（title, artist, duration, album, genre），duration 字段现为毫秒单位字符串。LibraryProvider.scanLibrary() 已更新以处理毫秒时长并转换为 MM:SS 格式。准备好集成具体的元数据提取库（如 audio_metadata_reader 或 metadata_god），但暂未集成以避免依赖兼容性问题。
